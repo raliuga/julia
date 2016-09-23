@@ -127,7 +127,14 @@ try
     end
     wait(t)
 
-    let Foo = eval(Main, Foo_module)
+    let Foo = getfield(Main, Foo_module)
+        @test_throws MethodError Foo.foo(17) # world shouldn't be visible yet
+    end
+    @eval let Foo_module = $(QuoteNode(Foo_module)), # use @eval to see the results of loading the compile
+              Foo = getfield(Main, Foo_module),
+              dir = $(QuoteNode(dir)),
+              cachefile = $(QuoteNode(cachefile)),
+              Foo_file = $(QuoteNode(Foo_file))
         @test Foo.foo(17) == 18
         @test Foo.Bar.bar(17) == 19
 
