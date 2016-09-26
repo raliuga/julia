@@ -75,8 +75,9 @@ catch_err = IOStream("")
 rde, wre = redirect_stderr()
 rdo, wro = redirect_stdout()
 
-# Check that the fallback test set throws immediately
-#@test_throws ErrorException (@test 1 == 2)
+# test that FallbackTestSet will throw immediately
+cmd = `$(Base.julia_cmd()) --check-bounds=yes --startup-file=no --depwarn=error test_exec.jl`
+@test !success(pipeline(cmd; stdout=wro, stderr=wre))
 
 @testset "no errors" begin
     @test true
