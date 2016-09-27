@@ -47,6 +47,7 @@ STANDALONE_COMPILER_RT := 0
 COMPILER_RT_TAR := $(LLVM_COMPILER_RT_TAR)
 CRT_DIR := $(LLVM_BUILDDIR_withtype)/lib/clang/$(LLVM_VER)/lib/$(CRT_OS)
 $(CRT_DIR)/lib$(CRT_STATIC_NAME): | $(LLVM_BUILDDIR_withtype)/build-compiled
+
 else ifeq ($(BUILD_COMPILER_RT), 1)
 STANDALONE_COMPILER_RT := 1
 COMPILER_RT_TAR := $(SRCDIR)/srccache/compiler-rt-$(LLVM_TAR_EXT)
@@ -56,13 +57,13 @@ $(error compiler-rt is not available.)
 endif
 
 ifeq ($(STANDALONE_COMPILER_RT),0)
-COMPILER_RT_TAR:=
 # Use compiler-rt from the clang installation
 $(COMPILER_RT_BUILDDIR)/$(COMPILER_RT_LIBFILE): $(CRT_DIR)/lib$(CRT_STATIC_NAME) $(COMPILER_RT_BUILDDIR)/build-configured
-	$(CC) $(LDFLAGS) -shared $(fPIC) -o $@ -nostdlib -Wl,--whole-archive -L$(CRT_DIR) -l$(CRT_STATIC_NAME)
+	$(CC) $(LDFLAGS) -shared $(fPIC) -o $@ -nostdlib $(WHOLE_ARCHIVE) -L$(CRT_DIR) -l$(CRT_STATIC_NAME) $(WHOLE_NOARCHIVE)
 else
-COMPILER_RT_TAR:=
-
+# The standalone compiler-rt build is based on
+# https://github.com/ReservedField/arm-compiler-rt
+MAKEFLAGS += --no-builtin-rules
 $(error Standalone compiler-rt is not supported yet.)
 endif
 
